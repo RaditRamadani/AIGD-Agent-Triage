@@ -121,12 +121,12 @@ Tracking implementasi berdasarkan [implementation_plan.md](file:///d:/Coding/AIG
 - [x] Disclaimer di akhir stream
 
 ### 4.3 Test E2E
-- [ ] Teks → streaming + Care Navigation + reasoning
-- [ ] Gejala pemeriksaan → Puskesmas/Klinik → `getNearbyHospitals` → peta
-- [ ] Gejala darurat → IGD → Maps langsung (tanpa booking)
-- [ ] Gejala ringan → Telemedicine/Self-care → anjuran
-- [ ] Booking → `createMockBooking` → doc Firestore
-- [ ] Setiap rekomendasi ada reasoning bahasa awam
+- [x] Teks → streaming + Care Navigation + reasoning
+- [x] Gejala pemeriksaan → Puskesmas/Klinik → `getNearbyHospitals` → peta
+- [x] Gejala darurat → IGD → Maps langsung (tanpa booking)
+- [x] Gejala ringan → Telemedicine/Self-care → anjuran
+- [x] Booking → `createMockBooking` → doc Firestore
+- [x] Setiap rekomendasi ada reasoning bahasa awam
 
 ---
 

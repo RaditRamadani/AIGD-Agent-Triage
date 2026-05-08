@@ -1,31 +1,25 @@
-import {
-  Client,
-  TravelMode,
-  type PlaceData,
-} from '@googlemaps/google-maps-services-js';
+import { db } from '@/lib/firebase/admin';
 import type { Facility } from '@/types';
 
-const mapsClient = new Client({});
-
-/**
- * Map internal facility type to a Places API keyword for more accurate results.
- */
-function mapFacilityTypeToKeyword(facilityType: string): string {
-  switch (facilityType) {
-    case 'IGD':
-      return 'IGD rumah sakit';
-    case 'Puskesmas':
-      return 'puskesmas';
-    case 'Klinik':
-      return 'klinik';
-    default:
-      return 'rumah sakit';
-  }
+// Haversine formula to calculate distance between two coordinates in kilometers
+function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c; // Distance in km
+  return d;
 }
 
 /**
- * Find nearby healthcare facilities using Google Maps Places API,
- * then enrich each result with driving distance/duration via Directions API.
+ * Find nearby healthcare facilities using Firestore dummy data.
+ * Calculates straight-line distance locally.
  *
  * Returns top 5 results sorted by distance (ascending).
  */
@@ -35,69 +29,43 @@ export async function findNearbyFacilities(
   facilityType: string,
   radiusMeters: number = 5000
 ): Promise<Facility[]> {
-  const keyword = mapFacilityTypeToKeyword(facilityType);
+  try {
+    // 1. Ambil data fasilitas dari Firestore dummy
+    const facilitiesSnapshot = await db.collection('facilities').get();
 
-  const placesResponse = await mapsClient.placesNearby({
-    params: {
-      location: { lat, lng },
-      radius: radiusMeters,
-      keyword,
-      // Use 'hospital' as a broad type; keyword narrows the results
-      type: 'hospital',
-      key: process.env.GOOGLE_MAPS_API_KEY!,
-    },
-    timeout: 5000,
-  });
+    // Filter by exact type if requested, but for now we loosely match
+    const allFacilities = facilitiesSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Facility[];
 
-  const top5 = placesResponse.data.results.slice(0, 5);
-
-  // Enrich each facility with distance + duration
-  const enriched = await Promise.all(
-    top5.map(async (place: Partial<PlaceData>) => {
-      const dest = place.geometry?.location;
-      if (!dest) return null;
-
-      let distance_km: number | null = null;
-      let duration_minutes: number | null = null;
-
-      try {
-        const directionsResponse = await mapsClient.directions({
-          params: {
-            origin: { lat, lng },
-            destination: dest,
-            mode: TravelMode.driving,
-            key: process.env.GOOGLE_MAPS_API_KEY!,
-          },
-          timeout: 5000,
-        });
-
-        const leg = directionsResponse.data.routes[0]?.legs[0];
-        if (leg) {
-          distance_km = Math.round((leg.distance.value / 1000) * 10) / 10;
-          duration_minutes = Math.round(leg.duration.value / 60);
-        }
-      } catch {
-        // Directions API failed for this place — continue with null values
-      }
+    const enriched = allFacilities.map((facility) => {
+      // 2. Hitung jarak
+      const distanceKm = getDistanceFromLatLonInKm(
+        lat,
+        lng,
+        facility.location.lat,
+        facility.location.lng
+      );
+      
+      // Asumsikan kecepatan rata-rata mobil di kota 30km/h
+      const durationMins = Math.round((distanceKm / 30) * 60);
 
       return {
-        place_id: place.place_id ?? '',
-        name: place.name ?? 'Unknown',
-        address: place.vicinity ?? '',
-        location: dest,
-        is_open: place.opening_hours?.open_now ?? null,
-        distance_km,
-        duration_minutes,
-      } satisfies Facility;
-    })
-  );
-
-  // Filter nulls and sort by distance ascending (nulls last)
-  return enriched
-    .filter((f): f is Facility => f !== null)
-    .sort((a, b) => {
-      if (a.distance_km === null) return 1;
-      if (b.distance_km === null) return -1;
-      return a.distance_km - b.distance_km;
+        ...facility,
+        distance_km: parseFloat(distanceKm.toFixed(2)),
+        duration_mins: durationMins,
+      };
     });
+
+    // 3. Filter berdasarkan radius dan urutkan
+    const filteredAndSorted = enriched
+      .filter((f) => f.distance_km * 1000 <= radiusMeters)
+      .sort((a, b) => a.distance_km - b.distance_km);
+
+    return filteredAndSorted.slice(0, 5);
+  } catch (error) {
+    console.error('Error in findNearbyFacilities:', error);
+    return [];
+  }
 }
