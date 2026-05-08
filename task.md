@@ -45,28 +45,28 @@ Tracking implementasi berdasarkan [implementation_plan.md](file:///d:/Coding/AIG
 ## Fase 2: Integrasi Firebase & Maps
 
 ### 2.1 Firebase Admin
-- [ ] Buat `src/lib/firebase/admin.ts` — singleton `initializeApp` + `getFirestore`
-- [ ] Export `db` instance
-- [ ] Handle `FIREBASE_PRIVATE_KEY` newline replace
+- [x] Buat `src/lib/firebase/admin.ts` — singleton `initializeApp` + `getFirestore`
+- [x] Export `db` instance
+- [x] Handle `FIREBASE_PRIVATE_KEY` newline replace
 
 ### 2.2 Firestore Operations
-- [ ] `createBooking(params)` → koleksi `bookings` (dengan `care_navigation`, `reasoning`)
-- [ ] `saveCareSession(params)` → koleksi `care_sessions`
+- [x] `createBooking(params)` → koleksi `bookings` (dengan `care_navigation`, `reasoning`)
+- [x] `saveCareSession(params)` → koleksi `care_sessions`
 
 ### 2.3 Seed Data
-- [ ] Buat `src/lib/firebase/seed.ts` — 5–10 faskes dummy Surabaya
-- [ ] Data: `name`, `type`, `address`, `location`, `phone`, `operating_hours`, `services[]`, `available_slots[]`
-- [ ] Tambah script `"seed"` di `package.json`
+- [x] Buat `src/lib/firebase/seed.ts` — 5–10 faskes dummy Surabaya
+- [x] Data: `name`, `type`, `address`, `location`, `phone`, `operating_hours`, `services[]`, `available_slots[]`
+- [x] Tambah script `"seed"` di `package.json`
 - [ ] Jalankan & verifikasi di Firestore Console
 
 ### 2.4 Google Maps Service
-- [ ] Buat `src/lib/geo/maps-service.ts`
-- [ ] `findNearbyFacilities(lat, lng, facilityType, radius)`:
-  - [ ] `placesNearby()` dengan keyword mapping (IGD/Puskesmas/Klinik)
-  - [ ] Ambil top 5 hasil
-  - [ ] `directions()` per faskes → `distance_km` + `duration_minutes`
-  - [ ] Return sorted by jarak
-- [ ] Helper `mapFacilityTypeToKeyword()`
+- [x] Buat `src/lib/geo/maps-service.ts`
+- [x] `findNearbyFacilities(lat, lng, facilityType, radius)`:
+  - [x] `placesNearby()` dengan keyword mapping (IGD/Puskesmas/Klinik)
+  - [x] Ambil top 5 hasil
+  - [x] `directions()` per faskes → `distance_km` + `duration_minutes`
+  - [x] Return sorted by jarak
+- [x] Helper `mapFacilityTypeToKeyword()`
 
 ---
 
