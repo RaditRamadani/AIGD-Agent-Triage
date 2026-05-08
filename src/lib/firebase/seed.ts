@@ -14,13 +14,24 @@ import * as path from 'path';
 // Load .env.local so the script can run standalone
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-const serviceAccount: ServiceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID!,
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-};
+const projectId = process.env.FIREBASE_PROJECT_ID;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-const app = initializeApp({ credential: cert(serviceAccount) });
+let app;
+if (clientEmail && privateKey) {
+  const serviceAccount: ServiceAccount = {
+    projectId: projectId!,
+    clientEmail,
+    privateKey,
+  };
+  app = initializeApp({ credential: cert(serviceAccount) });
+} else if (projectId) {
+  app = initializeApp({ projectId });
+} else {
+  throw new Error('FIREBASE_PROJECT_ID is required');
+}
+
 const db = getFirestore(app);
 
 // ── Helper: generate time slots for a given date ──

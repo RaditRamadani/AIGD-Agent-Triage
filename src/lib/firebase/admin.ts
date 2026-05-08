@@ -4,15 +4,30 @@ import type { CareNavigationType } from '@/types';
 
 // ── Singleton Firebase Admin ──
 // Prevents re-initialization during Next.js hot-reload
-const serviceAccount: ServiceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID!,
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
-  // Sumopod/Docker injects newlines as literal \n — must be converted
-  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-};
-
+// Mode 1: Full Service Account (production) — butuh FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY
+// Mode 2: projectId-only (development) — cukup FIREBASE_PROJECT_ID
 if (!getApps().length) {
-  initializeApp({ credential: cert(serviceAccount) });
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+  if (clientEmail && privateKey) {
+    // Production mode: full Service Account credentials
+    const serviceAccount: ServiceAccount = {
+      projectId: projectId!,
+      clientEmail,
+      privateKey,
+    };
+    initializeApp({ credential: cert(serviceAccount) });
+    console.log('🔥 Firebase Admin initialized with Service Account');
+  } else if (projectId) {
+    // Dev mode: projectId only (gunakan Application Default Credentials)
+    // Pastikan sudah login: gcloud auth application-default login
+    initializeApp({ projectId });
+    console.log('🔥 Firebase Admin initialized with projectId (dev mode)');
+  } else {
+    throw new Error('FIREBASE_PROJECT_ID is required in .env.local');
+  }
 }
 
 export const db = getFirestore();

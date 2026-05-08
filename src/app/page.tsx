@@ -1,101 +1,83 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useRouter } from "next/navigation";
+import { Activity, Mic, Camera, MessageSquare, Shield } from "lucide-react";
+
+// ── Landing Page ──
+// Halaman awal AIGD Agent dengan CTA besar menuju /chat
+export default function LandingPage() {
+  const router = useRouter();
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main
+      id="main-content"
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-8"
+    >
+      {/* ── Hero Section ── */}
+      <div className="max-w-lg w-full text-center space-y-6">
+        {/* Logo / Icon */}
+        <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-[hsl(188,84%,37%)] to-[hsl(142,71%,45%)] flex items-center justify-center shadow-lg">
+          <Activity className="w-10 h-10 text-white" strokeWidth={2.5} />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        {/* Judul */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            AIGD Agent
+          </h1>
+          <p className="text-[hsl(var(--color-text-muted))] mt-2 text-lg">
+            Navigator Kesehatan Cerdas
+          </p>
+        </div>
+
+        {/* Deskripsi singkat */}
+        <p className="text-base leading-relaxed">
+          Ceritakan keluhan Anda melalui <strong>suara</strong>,{" "}
+          <strong>foto</strong>, atau <strong>teks</strong> — dan kami akan
+          membantu menavigasi Anda ke fasilitas kesehatan yang tepat.
+        </p>
+
+        {/* Feature pills */}
+        <div className="flex flex-wrap justify-center gap-3">
+          <FeaturePill icon={<Mic className="w-4 h-4" />} label="Input Suara" />
+          <FeaturePill icon={<Camera className="w-4 h-4" />} label="Foto Gejala" />
+          <FeaturePill icon={<MessageSquare className="w-4 h-4" />} label="Chat Teks" />
+        </div>
+
+        {/* CTA Button */}
+        <button
+          onClick={() => router.push("/chat")}
+          className="touch-target w-full max-w-xs mx-auto px-8 py-4 rounded-xl
+                     bg-[hsl(var(--color-primary))] text-white font-semibold text-lg
+                     shadow-lg hover:shadow-xl
+                     hover:brightness-110 active:scale-[0.98]
+                     transition-all duration-200 ease-out cursor-pointer"
+          aria-label="Mulai konsultasi kesehatan"
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          Mulai Konsultasi
+        </button>
+
+        {/* Disclaimer mini */}
+        <div className="disclaimer-banner rounded-lg px-4 py-3 flex items-start gap-2 text-left">
+          <Shield className="w-4 h-4 mt-0.5 shrink-0" />
+          <p>
+            Sistem ini adalah navigator kesehatan, bukan dokter. Rekomendasi
+            yang diberikan bukan diagnosis medis final.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+// ── Sub-component: Feature Pill ──
+function FeaturePill({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
+                     bg-[hsl(var(--color-primary-light))] text-[hsl(var(--color-primary))]
+                     text-sm font-medium">
+      {icon}
+      {label}
+    </span>
   );
 }

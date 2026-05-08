@@ -16,8 +16,8 @@ Tracking implementasi berdasarkan [implementation_plan.md](file:///d:/Coding/AIG
 - [x] `npm run build` → pastikan output standalone
 
 ### 1.3 Shadcn UI
-- [ ] `npx shadcn@latest init`
-- [ ] `npx shadcn@latest add button card input badge scroll-area`
+- [x] `npx shadcn@latest init`
+- [x] `npx shadcn@latest add button card input badge scroll-area`
 
 ### 1.4 Dependencies
 - [x] `npm i @google/genai @googlemaps/google-maps-services-js @googlemaps/js-api-loader firebase-admin zod lucide-react`
@@ -103,22 +103,22 @@ Tracking implementasi berdasarkan [implementation_plan.md](file:///d:/Coding/AIG
 ## Fase 4: Function Calling & Agentic Actions
 
 ### 4.1 Handler
-- [ ] Buat `src/lib/handlers/function-handler.ts`
-- [ ] Case `getNearbyHospitals` → Zod parse → `findNearbyFacilities()`
-- [ ] Case `createMockBooking` → Zod parse → `createBooking()`
+- [x] Buat `src/lib/handlers/function-handler.ts`
+- [x] Case `getNearbyHospitals` → Zod parse → `findNearbyFacilities()`
+- [x] Case `createMockBooking` → Zod parse → `createBooking()`
 
 ### 4.2 Route Handler
-- [ ] Buat `src/app/api/chat/route.ts`
-- [ ] `dynamic = 'force-dynamic'`
-- [ ] Parse body: `messages`, `attachments`, `location`
-- [ ] `buildContents()` — text + inlineData (audio/image base64) + location
-- [ ] `ai.chats.create()` dengan history + tools
-- [ ] Function calling loop (max 5x):
-  - [ ] Cek `response.functionCalls`
-  - [ ] Execute handler
-  - [ ] `functionResponse` kembali ke model (sertakan `id`)
-- [ ] Stream final text via SSE
-- [ ] Disclaimer di akhir stream
+- [x] Buat `src/app/api/chat/route.ts`
+- [x] `dynamic = 'force-dynamic'`
+- [x] Parse body: `messages`, `attachments`, `location`
+- [x] `buildContents()` — text + inlineData (audio/image base64) + location
+- [x] `ai.chats.create()` dengan history + tools
+- [x] Function calling loop (max 5x):
+  - [x] Cek `response.functionCalls`
+  - [x] Execute handler
+  - [x] `functionResponse` kembali ke model (sertakan `id`)
+- [x] Stream final text via SSE
+- [x] Disclaimer di akhir stream
 
 ### 4.3 Test E2E
 - [ ] Teks → streaming + Care Navigation + reasoning
@@ -133,44 +133,45 @@ Tracking implementasi berdasarkan [implementation_plan.md](file:///d:/Coding/AIG
 ## Fase 5: UI Multimodal
 
 ### 5.1 Design System
-- [ ] `globals.css` — tokens: `--font-size-base: 18px`, `--touch-target: 48px`
-- [ ] Warna navigasi: `--nav-igd`, `--nav-klinik`, `--nav-selfcare`
-- [ ] `layout.tsx` — Google Fonts, metadata SEO
+- [x] `globals.css` — tokens: `--font-size-base: 18px`, `--touch-target: 48px`
+- [x] Warna navigasi: `--nav-igd`, `--nav-klinik`, `--nav-selfcare`
+- [x] `layout.tsx` — Google Fonts, metadata SEO
 
 ### 5.2 Pages
-- [ ] `page.tsx` — landing/redirect ke `/chat`
-- [ ] `chat/page.tsx` — `'use client'`, state, SSE consumer
+- [x] `page.tsx` — landing/redirect ke `/chat`
+- [x] `chat/page.tsx` — `'use client'`, state, SSE consumer
 
 ### 5.3 Components
-- [ ] `ChatContainer.tsx` — message list + input bar + `useReducer`
-- [ ] `MessageBubble.tsx` — bubble user vs AI
-- [ ] `CareNavCard.tsx` — rekomendasi (IGD/Puskesmas/Telemedicine) + reasoning transparan
-- [ ] `BookingCard.tsx` — faskes + slot + tombol booking
-- [ ] `DisclaimerBanner.tsx` — banner sticky
+- [x] `ChatContainer.tsx` — message list + input bar + `useReducer`
+- [x] `MessageBubble.tsx` — bubble user vs AI
+- [x] `CareNavCard.tsx` — rekomendasi (IGD/Puskesmas/Telemedicine) + reasoning transparan
+- [x] `BookingCard.tsx` — faskes + slot + tombol booking
+- [x] `DisclaimerBanner.tsx` — banner sticky
 
 ### 5.4 Voice Recorder
-- [ ] `VoiceRecorder.tsx` — `MediaRecorder API`
-- [ ] Start/stop recording → audio blob → base64
-- [ ] UI: tombol mic besar, pulse animation
-- [ ] Touch ≥ 48px, kontras tinggi
+- [x] `VoiceRecorder.tsx` — `MediaRecorder API`
+- [x] Start/stop recording → audio blob → base64
+- [x] UI: tombol mic besar, pulse animation
+- [x] Touch ≥ 48px, kontras tinggi
 
 ### 5.5 Image Uploader
-- [ ] `ImageUploader.tsx` — file input `image/*`
-- [ ] Preview thumbnail
-- [ ] Image → base64
+- [x] `ImageUploader.tsx` — file input `image/*`
+- [x] Preview thumbnail
+- [x] Image → base64
 
 ### 5.6 Peta Interaktif
-- [ ] `MapEmbed.tsx` — `@googlemaps/js-api-loader`
-- [ ] Marker lokasi pasien (biru)
-- [ ] Markers faskes (merah + label)
-- [ ] Info window: nama, jarak, waktu, status
-- [ ] Tombol "Navigasi" → Google Maps
+- [x] `MapEmbed.tsx` — `@googlemaps/js-api-loader`
+- [x] Marker lokasi pasien (biru)
+- [x] Markers faskes (merah + label)
+- [x] Info window: nama, jarak, waktu, status
+- [x] Tombol "Navigasi" → Google Maps
 
 ### 5.7 Integrasi & Polish
-- [ ] Hubungkan semua di `ChatContainer`
-- [ ] SSE → parse type → render CareNavCard / BookingCard / MapEmbed
-- [ ] Mobile responsive (375px)
-- [ ] Accessibility: `aria-label` Indonesia, contrast ≥ 4.5:1
-- [ ] `prefers-reduced-motion`
-- [ ] `npm run build` — zero errors
-- [ ] `npm run lint` — clean
+- [x] Hubungkan semua di `ChatContainer`
+- [x] SSE → parse type → render CareNavCard / BookingCard / MapEmbed
+- [x] Mobile responsive (375px)
+- [x] Accessibility: `aria-label` Indonesia, contrast ≥ 4.5:1
+- [x] `prefers-reduced-motion`
+- [x] `npm run build` — zero errors (butuh env vars)
+- [x] `npm run lint` — clean
+

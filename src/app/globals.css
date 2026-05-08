@@ -1,27 +1,234 @@
+/* ── Import Google Fonts: Figtree (heading) + Noto Sans (body) ── */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ══════════════════════════════════════════════════════════════
+   AIGD Agent — Design System Tokens
+   Style: Accessible & Ethical (Healthcare)
+   Colors: Medical teal + Health green
+   Typography: Figtree / Noto Sans
+   ══════════════════════════════════════════════════════════════ */
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* ── Core font sizing (lansia-friendly, 18px base) ── */
+    --font-size-base: 18px;
+    --touch-target: 48px;
+
+    /* ── Healthcare color palette ── */
+    --color-primary: 188 84% 37%;       /* #0891B2 — Medical Teal */
+    --color-primary-light: 188 84% 95%; /* light tint */
+    --color-secondary: 187 72% 54%;     /* #22D3EE — Cyan accent */
+    --color-cta: 142 71% 45%;           /* #22C55E — Health Green */
+    --color-cta-hover: 142 71% 38%;     /* Darker green on hover */
+    --color-bg: 166 76% 97%;            /* #F0FDFA — Warm teal white */
+    --color-text: 169 60% 19%;          /* #134E4A — Deep teal text */
+    --color-text-muted: 169 30% 40%;    /* Muted text */
+    --color-surface: 0 0% 100%;         /* White card surfaces */
+    --color-border: 169 20% 88%;        /* Subtle borders */
+
+    /* ── Care Navigation colors ── */
+    --nav-igd: 0 84% 60%;              /* #EF4444 — Red for IGD (darurat) */
+    --nav-igd-bg: 0 84% 97%;           /* Light red background */
+    --nav-klinik: 45 93% 47%;          /* #EAB308 — Yellow for Puskesmas/Klinik */
+    --nav-klinik-bg: 45 93% 95%;       /* Light yellow background */
+    --nav-selfcare: 142 71% 45%;       /* #22C55E — Green for Self-care */
+    --nav-selfcare-bg: 142 71% 95%;    /* Light green background */
+
+    /* ── Shadcn/ui CSS Variables ── */
+    --background: var(--color-bg);
+    --foreground: var(--color-text);
+    --card: var(--color-surface);
+    --card-foreground: var(--color-text);
+    --popover: var(--color-surface);
+    --popover-foreground: var(--color-text);
+    --primary: var(--color-primary);
+    --primary-foreground: 0 0% 100%;
+    --secondary: 169 20% 95%;
+    --secondary-foreground: var(--color-text);
+    --muted: 169 20% 95%;
+    --muted-foreground: var(--color-text-muted);
+    --accent: 169 20% 95%;
+    --accent-foreground: var(--color-text);
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--color-border);
+    --input: var(--color-border);
+    --ring: var(--color-primary);
+    --radius: 0.75rem;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Base typography & sizing ── */
+@layer base {
+  html {
+    font-size: var(--font-size-base);
+  }
+
+  body {
+    font-family: 'Noto Sans', var(--font-geist-sans), system-ui, sans-serif;
+    background-color: hsl(var(--color-bg));
+    color: hsl(var(--color-text));
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Figtree', var(--font-geist-sans), system-ui, sans-serif;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* ── Accessible focus ring (3-4px, high contrast) ── */
+  *:focus-visible {
+    outline: 3px solid hsl(var(--color-primary));
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+
+  /* ── Skip link for keyboard nav ── */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 9999;
+    padding: 0.5rem 1rem;
+    background-color: hsl(var(--color-primary));
+    color: white;
+    font-weight: 600;
+  }
+  .skip-link:focus {
+    top: 0;
+  }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* ══════════════════════════════════════════════════════════════
+   Component Utilities
+   ══════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /* ── Touch target enforcement (min 48x48px per WCAG) ── */
+  .touch-target {
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
+
+  /* ── Care Navigation card variants ── */
+  .care-card-igd {
+    background-color: hsl(var(--nav-igd-bg));
+    border-left: 4px solid hsl(var(--nav-igd));
+  }
+
+  .care-card-klinik {
+    background-color: hsl(var(--nav-klinik-bg));
+    border-left: 4px solid hsl(var(--nav-klinik));
+  }
+
+  .care-card-selfcare {
+    background-color: hsl(var(--nav-selfcare-bg));
+    border-left: 4px solid hsl(var(--nav-selfcare));
+  }
+
+  /* ── Pulse animation for voice recording ── */
+  .pulse-recording {
+    animation: pulse-ring 1.5s ease-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      box-shadow: 0 0 0 0 hsla(var(--nav-igd), 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 12px hsla(var(--nav-igd), 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 hsla(var(--nav-igd), 0);
+    }
+  }
+
+  /* ── Message bubble base styles ── */
+  .bubble-user {
+    background-color: hsl(var(--color-primary));
+    color: white;
+    border-radius: 1rem 1rem 0.25rem 1rem;
+  }
+
+  .bubble-ai {
+    background-color: hsl(var(--color-surface));
+    color: hsl(var(--color-text));
+    border: 1px solid hsl(var(--color-border));
+    border-radius: 1rem 1rem 1rem 0.25rem;
+  }
+
+  /* ── Disclaimer banner ── */
+  .disclaimer-banner {
+    background-color: hsl(45 93% 95%);
+    border: 1px solid hsl(45 93% 80%);
+    color: hsl(45 70% 25%);
+    font-size: 0.8rem;
+  }
+
+  /* ── Typing indicator animation ── */
+  .typing-dot {
+    animation: typing-bounce 1.4s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes typing-bounce {
+    0%, 60%, 100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-6px);
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Accessibility: Respect reduced motion preference
+   ══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Smooth scroll for non-reduced-motion users ── */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Scrollbar Styling (chat area)
+   ══════════════════════════════════════════════════════════════ */
+
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--color-border));
+  border-radius: 3px;
 }
