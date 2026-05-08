@@ -73,30 +73,30 @@ Tracking implementasi berdasarkan [implementation_plan.md](file:///d:/Coding/AIG
 ## Fase 3: Core AI & Prompting
 
 ### 3.1 Gemini Client
-- [ ] Buat `src/lib/gemini/client.ts` — `GoogleGenAI` singleton
-- [ ] Pastikan hanya server-side
+- [x] Buat `src/lib/gemini/client.ts` — `GoogleGenAI` singleton
+- [x] Pastikan hanya server-side
 
 ### 3.2 System Prompt
-- [ ] Buat `src/lib/gemini/system-prompt.ts`
-- [ ] Peran: "Navigator kesehatan, BUKAN dokter"
-- [ ] Care Navigation — 3 jalur:
-  - [ ] 🏥 IGD — darurat → arahkan via Maps, tanpa booking
-  - [ ] 🏪 Puskesmas/Klinik — perlu pemeriksaan → cari faskes → booking
-  - [ ] 📱 Telemedicine/Self-care — ringan → anjuran
-- [ ] Reasoning transparan wajib (bahasa awam)
-- [ ] Batasan: tidak diagnosa, tidak resep obat
-- [ ] Disclaimer wajib di akhir respons
-- [ ] Instruksi kapan pakai `getNearbyHospitals` dan `createMockBooking`
+- [x] Buat `src/lib/gemini/system-prompt.ts`
+- [x] Peran: "Navigator kesehatan, BUKAN dokter"
+- [x] Care Navigation — 3 jalur:
+  - [x] 🏥 IGD — darurat → arahkan via Maps, tanpa booking
+  - [x] 🏪 Puskesmas/Klinik — perlu pemeriksaan → cari faskes → booking
+  - [x] 📱 Telemedicine/Self-care — ringan → anjuran
+- [x] Reasoning transparan wajib (bahasa awam)
+- [x] Batasan: tidak diagnosa, tidak resep obat
+- [x] Disclaimer wajib di akhir respons
+- [x] Instruksi kapan pakai `getNearbyHospitals` dan `createMockBooking`
 
 ### 3.3 Tool Declarations
-- [ ] Buat `src/lib/gemini/tools.ts` — import `Type` dari `@google/genai`
-- [ ] `getNearbyHospitalsDeclaration` — `lat`, `lng`, `facility_type` (enum), `radius_meters`
-- [ ] `createMockBookingDeclaration` — `facility_id`, `facility_name`, `patient_name`, `patient_contact`, `symptoms_summary`, `care_navigation` (enum), `reasoning`, `preferred_time`
+- [x] Buat `src/lib/gemini/tools.ts` — import `Type` dari `@google/genai`
+- [x] `getNearbyHospitalsDeclaration` — `lat`, `lng`, `facility_type` (enum), `radius_meters`
+- [x] `createMockBookingDeclaration` — `facility_id`, `facility_name`, `patient_name`, `patient_contact`, `symptoms_summary`, `care_navigation` (enum), `reasoning`, `preferred_time`
 
 ### 3.4 Zod Schemas
-- [ ] Buat `src/lib/schemas/function-schemas.ts`
-- [ ] `GetNearbyHospitalsSchema`
-- [ ] `CreateMockBookingSchema` (dengan `care_navigation` enum + `reasoning`)
+- [x] Buat `src/lib/schemas/function-schemas.ts`
+- [x] `GetNearbyHospitalsSchema`
+- [x] `CreateMockBookingSchema` (dengan `care_navigation` enum + `reasoning`)
 
 ---
 
