@@ -27,7 +27,7 @@ export async function findNearbyFacilities(
   lat: number,
   lng: number,
   facilityType: string,
-  radiusMeters: number = 5000
+  radiusMeters: number = 10000
 ): Promise<Facility[]> {
   try {
     // 1. Ambil data fasilitas dari Firestore dummy
