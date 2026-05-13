@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="public/banner.png" alt="AIGD Agent Banner" width="100%" />
+</div>
+
 # 🚀 AIGD Agent
 
 AIGD Agent adalah sistem navigasi kesehatan cerdas yang dirancang untuk memberikan rekomendasi triase dan fasilitasi pemesanan layanan kesehatan secara efisien. Sistem ini memanfaatkan kecerdasan buatan untuk mengurai keluhan medis secara instan dan mengarahkan pengguna ke fasilitas penanganan yang paling tepat.
