@@ -24,6 +24,34 @@ const DISCLAIMER =
 // ── Max function calling loop untuk mencegah infinite loop ──
 const MAX_FUNCTION_CALL_ROUNDS = 5;
 
+// ── Retry helper untuk menangani error 503 (overloaded) dari Gemini ──
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 2,
+  delayMs: number = 2000
+): Promise<T> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: unknown) {
+      const isRetryable =
+        error instanceof Error &&
+        (error.message.includes('503') ||
+         error.message.includes('UNAVAILABLE') ||
+         error.message.includes('overloaded') ||
+         error.message.includes('high demand'));
+
+      if (isRetryable && attempt < maxRetries) {
+        console.warn(`Gemini 503 — retry ${attempt + 1}/${maxRetries} in ${delayMs}ms...`);
+        await new Promise((r) => setTimeout(r, delayMs * (attempt + 1)));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error('Retry exhausted');
+}
+
 // ── Interface untuk body request ──
 interface ChatRequestBody {
   messages: ChatMessage[];
@@ -148,9 +176,9 @@ export async function POST(request: NextRequest) {
           history: contents.slice(0, -1), // Semua kecuali pesan terakhir
         });
 
-        // ── Kirim pesan terakhir ke Gemini ──
+        // ── Kirim pesan terakhir ke Gemini (dengan auto-retry untuk 503) ──
         const lastContent = contents[contents.length - 1];
-        let response = await chat.sendMessage({ message: lastContent.parts! });
+        let response = await withRetry(() => chat.sendMessage({ message: lastContent.parts! }));
 
         // ── Function calling loop ──
         // Gemini bisa minta eksekusi function, lalu kita kirim hasilnya balik.
@@ -224,8 +252,8 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          // ── Kirim semua function responses kembali ke Gemini ──
-          response = await chat.sendMessage({ message: functionResponses });
+          // ── Kirim semua function responses kembali ke Gemini (dengan auto-retry) ──
+          response = await withRetry(() => chat.sendMessage({ message: functionResponses }));
         }
 
         // ── Stream teks final dari Gemini ──
