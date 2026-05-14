@@ -1,96 +1,148 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Mic, Square } from "lucide-react";
 
 // ── VoiceRecorder ──
-// Tombol mic besar untuk merekam suara pasien via MediaRecorder API.
-// Hasil rekaman di-convert ke base64 dan dikirim ke parent via onRecorded.
+// Tombol mic untuk merekam suara pasien dan mentranskrip ke teks
+// menggunakan Web Speech API (SpeechRecognition) bawaan browser.
+// Hasil transkripsi langsung masuk ke kolom chat sebagai teks.
 
 interface VoiceRecorderProps {
-  onRecorded: (audioBase64: string, mimeType: string) => void;
+  onTranscript: (text: string) => void;
   disabled?: boolean;
 }
 
-export function VoiceRecorder({ onRecorded, disabled }: VoiceRecorderProps) {
+export function VoiceRecorder({ onTranscript, disabled }: VoiceRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const [interimText, setInterimText] = useState("");
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const [isSupported, setIsSupported] = useState(true);
 
-  // ── Start recording ──
-  const startRecording = useCallback(async () => {
+  // Cek apakah browser mendukung Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setIsSupported(false);
+    }
+  }, []);
+
+  // ── Start recording & transcription ──
+  const startRecording = useCallback(() => {
     try {
-      // Minta izin akses mic
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
 
-      // Pilih mime type yang didukung browser
-      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-        ? "audio/webm;codecs=opus"
-        : "audio/webm";
+      if (!SpeechRecognition) {
+        alert("Browser Anda tidak mendukung fitur pengenalan suara. Gunakan Chrome atau Edge.");
+        return;
+      }
 
-      const recorder = new MediaRecorder(stream, { mimeType });
-      mediaRecorderRef.current = recorder;
-      chunksRef.current = [];
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
 
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          chunksRef.current.push(event.data);
+      // Konfigurasi Speech Recognition
+      recognition.lang = "id-ID"; // Bahasa Indonesia
+      recognition.continuous = true; // Terus mendengar sampai di-stop
+      recognition.interimResults = true; // Tampilkan teks sementara
+
+      let finalTranscript = "";
+
+      // Event: hasil transkripsi masuk
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + " ";
+          } else {
+            interim += transcript;
+          }
+        }
+        // Update preview teks sementara
+        setInterimText(finalTranscript + interim);
+      };
+
+      // Event: speech recognition berhenti
+      recognition.onend = () => {
+        setIsRecording(false);
+        const result = finalTranscript.trim();
+        setInterimText("");
+        if (result) {
+          onTranscript(result);
         }
       };
 
-      recorder.onstop = () => {
-        // Gabung semua chunks jadi satu blob
-        const blob = new Blob(chunksRef.current, { type: mimeType });
+      // Event: error
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error("Speech recognition error:", event.error);
+        setIsRecording(false);
+        setInterimText("");
 
-        // Convert blob ke base64
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64 = (reader.result as string).split(",")[1]; // Hapus prefix "data:..."
-          onRecorded(base64, mimeType.split(";")[0]); // Kirim ke parent
-        };
-        reader.readAsDataURL(blob);
-
-        // Stop semua track mic
-        stream.getTracks().forEach((track) => track.stop());
+        if (event.error === "not-allowed") {
+          alert("Izin mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser.");
+        } else if (event.error === "no-speech") {
+          // Tidak ada suara terdeteksi — diam saja
+        }
       };
 
-      recorder.start();
+      recognition.start();
       setIsRecording(true);
     } catch (error) {
-      console.error("Gagal mengakses mikrofon:", error);
-      alert("Tidak dapat mengakses mikrofon. Pastikan izin sudah diberikan.");
+      console.error("Gagal memulai speech recognition:", error);
+      alert("Gagal mengakses mikrofon.");
     }
-  }, [onRecorded]);
+  }, [onTranscript]);
 
   // ── Stop recording ──
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+    if (recognitionRef.current && isRecording) {
+      recognitionRef.current.stop();
     }
   }, [isRecording]);
 
+  // Kalau browser tidak support, sembunyikan tombol
+  if (!isSupported) return null;
+
   return (
-    <button
-      type="button"
-      onClick={isRecording ? stopRecording : startRecording}
-      disabled={disabled}
-      className={`touch-target w-14 h-14 rounded-full flex items-center justify-center
-                  transition-all duration-200 cursor-pointer
-                  ${
-                    isRecording
-                      ? "bg-red-500 text-white pulse-recording hover:bg-red-600"
-                      : "bg-[hsl(var(--color-primary))] text-white hover:brightness-110"
-                  }
-                  ${disabled ? "opacity-50 cursor-not-allowed" : ""}
-                  shadow-lg hover:shadow-xl active:scale-95`}
-      aria-label={isRecording ? "Berhenti merekam" : "Mulai rekam suara"}
-    >
-      {isRecording ? (
-        <Square className="w-5 h-5" fill="white" />
-      ) : (
-        <Mic className="w-6 h-6" />
+    <div className="relative flex items-center">
+      {/* Preview teks transkripsi saat merekam */}
+      {isRecording && interimText && (
+        <div className="absolute bottom-full right-0 mb-2 p-3 bg-white rounded-xl shadow-lg
+                        border border-[hsl(var(--color-border))] max-w-[280px] text-sm
+                        text-[hsl(var(--color-text))] animate-fade-in">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-xs text-[hsl(var(--color-text-muted))] font-medium">
+              Mendengarkan...
+            </span>
+          </div>
+          <p className="italic">{interimText}</p>
+        </div>
       )}
-    </button>
+
+      <button
+        type="button"
+        onClick={isRecording ? stopRecording : startRecording}
+        disabled={disabled}
+        className={`touch-target w-14 h-14 rounded-full flex items-center justify-center
+                    transition-all duration-200 cursor-pointer
+                    ${
+                      isRecording
+                        ? "bg-red-500 text-white pulse-recording hover:bg-red-600"
+                        : "bg-[hsl(var(--color-primary))] text-white hover:brightness-110"
+                    }
+                    ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+                    shadow-lg hover:shadow-xl active:scale-95`}
+        aria-label={isRecording ? "Berhenti merekam" : "Mulai rekam suara"}
+      >
+        {isRecording ? (
+          <Square className="w-5 h-5" fill="white" />
+        ) : (
+          <Mic className="w-6 h-6" />
+        )}
+      </button>
+    </div>
   );
 }

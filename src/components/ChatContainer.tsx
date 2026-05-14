@@ -181,12 +181,13 @@ export function ChatContainer() {
     }
   }, []);
 
-  // ── Handle voice recording complete ──
-  const handleVoiceRecorded = useCallback(
-    (audioBase64: string, mimeType: string) => {
-      setAttachments((prev) => [...prev, { type: mimeType, data: audioBase64 }]);
-      // Auto-send dengan pesan default jika belum ada teks
-      sendMessage("(Pesan suara)", [{ type: mimeType, data: audioBase64 }]);
+  // ── Handle voice transcription complete ──
+  // Terima teks hasil transkripsi dari Web Speech API dan kirim sebagai chat biasa
+  const handleVoiceTranscript = useCallback(
+    (text: string) => {
+      if (text.trim()) {
+        sendMessage(text.trim());
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [state.feed, state.userLocation]
@@ -490,7 +491,7 @@ export function ChatContainer() {
           ) : (
             /* Voice recorder (visible when no text) */
             <VoiceRecorder
-              onRecorded={handleVoiceRecorded}
+              onTranscript={handleVoiceTranscript}
               disabled={state.isLoading}
             />
           )}
