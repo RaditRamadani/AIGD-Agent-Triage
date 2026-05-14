@@ -33,11 +33,23 @@ export async function findNearbyFacilities(
     // 1. Ambil data fasilitas dari Firestore dummy
     const facilitiesSnapshot = await db.collection('facilities').get();
 
-    // Filter by exact type if requested, but for now we loosely match
-    const allFacilities = facilitiesSnapshot.docs.map((doc) => ({
+    let allFacilities = facilitiesSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as Facility[];
+
+    if (facilityType) {
+      const ft = facilityType.toLowerCase();
+      if (ft.includes('puskesmas') || ft.includes('klinik')) {
+        allFacilities = allFacilities.filter((f) => 
+          f.type.toLowerCase() === 'puskesmas' || f.type.toLowerCase() === 'klinik'
+        );
+      } else if (ft.includes('igd')) {
+        allFacilities = allFacilities.filter((f) => f.type.toLowerCase() === 'igd');
+      } else {
+        allFacilities = allFacilities.filter((f) => f.type.toLowerCase().includes(ft));
+      }
+    }
 
     const enriched = allFacilities.map((facility) => {
       // 2. Hitung jarak
@@ -69,3 +81,4 @@ export async function findNearbyFacilities(
     return [];
   }
 }
+
