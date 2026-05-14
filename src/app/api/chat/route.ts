@@ -229,7 +229,13 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Stream teks final dari Gemini ──
-        const finalText = response.text ?? '';
+        let finalText = response.text ?? '';
+
+        // ── Kirim Care Navigation summary jika terdeteksi ──
+        const careNav = extractCareNavigation(finalText);
+
+        // Bersihkan tag triage dari teks agar tidak muncul di layar user
+        finalText = finalText.replace(/\[TRIAGE:\s*(IGD|PUSKESMAS|TELEMEDICINE)\]/gi, '').trim();
 
         if (finalText) {
           // Pecah teks jadi beberapa chunk untuk efek streaming
@@ -243,8 +249,6 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // ── Kirim Care Navigation summary jika terdeteksi ──
-        const careNav = extractCareNavigation(finalText);
         if (careNav) {
           await writeSSE(writer, encoder, {
             type: 'care_nav',
@@ -320,32 +324,24 @@ function splitTextForStreaming(text: string): string[] {
 }
 
 // ── Utility: Ekstrak Care Navigation level dari teks respons ──
-// Cari pola emoji + label navigasi di respons Gemini
+// Cari pola tag spesifik di respons Gemini
 function extractCareNavigation(
   text: string
 ): { care_navigation: string; reasoning: string } | null {
-  // Deteksi level berdasarkan emoji atau keyword (menggunakan word boundary \b agar "AIGD" tidak kena "IGD")
-  if (text.includes('🏥') || /\bigd\b/i.test(text) || /\bdarurat\b/i.test(text)) {
+  // Deteksi level berdasarkan tag eksplisit yang kita instruksikan ke AI
+  if (/\[TRIAGE:\s*IGD\]/i.test(text)) {
     return {
       care_navigation: 'IGD',
       reasoning: extractReasoning(text),
     };
   }
-  if (
-    text.includes('🏪') ||
-    /\bpuskesmas\b/i.test(text) ||
-    /\bklinik\b/i.test(text)
-  ) {
+  if (/\[TRIAGE:\s*PUSKESMAS\]/i.test(text)) {
     return {
       care_navigation: 'Puskesmas/Klinik',
       reasoning: extractReasoning(text),
     };
   }
-  if (
-    text.includes('📱') ||
-    /\btelemedicine\b/i.test(text) ||
-    /\bself-care\b/i.test(text)
-  ) {
+  if (/\[TRIAGE:\s*TELEMEDICINE\]/i.test(text)) {
     return {
       care_navigation: 'Telemedicine/Self-care',
       reasoning: extractReasoning(text),
@@ -357,11 +353,13 @@ function extractCareNavigation(
 
 // ── Utility: Ambil kalimat pertama sebagai reasoning singkat ──
 function extractReasoning(text: string): string {
+  // Bersihkan tag triage sebelum ambil reasoning
+  const cleanText = text.replace(/\[TRIAGE:\s*(IGD|PUSKESMAS|TELEMEDICINE)\]/gi, '').trim();
   // Ambil 2 kalimat pertama sebagai reasoning
-  const sentences = text.match(/[^.!?]+[.!?]+/g);
+  const sentences = cleanText.match(/[^.!?]+[.!?]+/g);
   if (sentences && sentences.length >= 2) {
     return sentences.slice(0, 2).join('').trim();
   }
   // Fallback: 200 karakter pertama
-  return text.substring(0, 200).trim();
+  return cleanText.substring(0, 200).trim();
 }
