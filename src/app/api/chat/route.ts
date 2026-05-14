@@ -324,8 +324,8 @@ function splitTextForStreaming(text: string): string[] {
 function extractCareNavigation(
   text: string
 ): { care_navigation: string; reasoning: string } | null {
-  // Deteksi level berdasarkan emoji atau keyword
-  if (text.includes('🏥') || text.toLowerCase().includes('igd')) {
+  // Deteksi level berdasarkan emoji atau keyword (menggunakan word boundary \b agar "AIGD" tidak kena "IGD")
+  if (text.includes('🏥') || /\bigd\b/i.test(text) || /\bdarurat\b/i.test(text)) {
     return {
       care_navigation: 'IGD',
       reasoning: extractReasoning(text),
@@ -333,8 +333,8 @@ function extractCareNavigation(
   }
   if (
     text.includes('🏪') ||
-    text.toLowerCase().includes('puskesmas') ||
-    text.toLowerCase().includes('klinik')
+    /\bpuskesmas\b/i.test(text) ||
+    /\bklinik\b/i.test(text)
   ) {
     return {
       care_navigation: 'Puskesmas/Klinik',
@@ -343,8 +343,8 @@ function extractCareNavigation(
   }
   if (
     text.includes('📱') ||
-    text.toLowerCase().includes('telemedicine') ||
-    text.toLowerCase().includes('self-care')
+    /\btelemedicine\b/i.test(text) ||
+    /\bself-care\b/i.test(text)
   ) {
     return {
       care_navigation: 'Telemedicine/Self-care',
