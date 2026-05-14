@@ -237,6 +237,14 @@ export async function POST(request: NextRequest) {
         // Bersihkan tag triage dari teks agar tidak muncul di layar user
         finalText = finalText.replace(/\[TRIAGE:\s*(IGD|PUSKESMAS|TELEMEDICINE)\]/gi, '').trim();
 
+        // Bersihkan markdown formatting (**, *, #) agar UI tetap bersih
+        finalText = finalText
+          .replace(/\*\*(.+?)\*\*/g, '$1')   // **bold** → bold
+          .replace(/\*(.+?)\*/g, '$1')       // *italic* → italic
+          .replace(/^#{1,6}\s+/gm, '')       // # heading → heading
+          .replace(/^[-*]\s+/gm, '• ')       // - list / * list → • list
+          .trim();
+
         if (finalText) {
           // Pecah teks jadi beberapa chunk untuk efek streaming
           const chunks = splitTextForStreaming(finalText);
@@ -265,7 +273,7 @@ export async function POST(request: NextRequest) {
         console.error('Chat processing error:', error);
         await writeSSE(writer, encoder, {
           type: 'text',
-          data: 'Maaf, terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi.',
+          data: `Maaf, terjadi kesalahan saat memproses permintaan Anda. (Error: ${error instanceof Error ? error.message : JSON.stringify(error)}) Silakan coba lagi.`,
         });
       } finally {
         // Tutup stream
