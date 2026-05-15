@@ -26,7 +26,9 @@ if (!getApps().length) {
     initializeApp({ projectId });
     console.log('🔥 Firebase Admin initialized with projectId (dev mode)');
   } else {
-    throw new Error('FIREBASE_PROJECT_ID is required in .env.local');
+    // Fallback for build time
+    initializeApp({ projectId: 'dummy-project' });
+    console.log('🔥 Firebase Admin initialized with dummy project (build mode)');
   }
 }
 

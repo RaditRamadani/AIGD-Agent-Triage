@@ -22,6 +22,7 @@ export interface CareNavResult {
 
 // ── Facility (from Google Maps) ──
 export interface Facility {
+  id?: string;
   place_id: string;
   name: string;
   address: string;

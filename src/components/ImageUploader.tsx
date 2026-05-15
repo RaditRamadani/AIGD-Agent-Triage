@@ -53,6 +53,7 @@ export function ImageUploader({
       {/* Preview thumbnail */}
       {preview && (
         <div className="absolute -top-16 left-0 w-14 h-14 rounded-lg overflow-hidden border-2 border-[hsl(var(--color-primary))] shadow-md">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={preview}
             alt="Preview gambar yang akan dikirim"
