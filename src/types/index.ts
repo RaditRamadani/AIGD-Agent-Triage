@@ -22,6 +22,7 @@ export interface CareNavResult {
 
 // ── Facility (from Google Maps) ──
 export interface Facility {
+  id?: string;
   place_id: string;
   name: string;
   address: string;
@@ -29,6 +30,7 @@ export interface Facility {
   is_open: boolean | null;
   distance_km: number | null;
   duration_minutes: number | null;
+  type?: string;
 }
 
 // ── Booking Result ──

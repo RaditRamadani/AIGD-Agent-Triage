@@ -42,12 +42,12 @@ export async function findNearbyFacilities(
       const ft = facilityType.toLowerCase();
       if (ft.includes('puskesmas') || ft.includes('klinik')) {
         allFacilities = allFacilities.filter((f) => 
-          f.type.toLowerCase() === 'puskesmas' || f.type.toLowerCase() === 'klinik'
+          f.type?.toLowerCase() === 'puskesmas' || f.type?.toLowerCase() === 'klinik'
         );
       } else if (ft.includes('igd')) {
-        allFacilities = allFacilities.filter((f) => f.type.toLowerCase() === 'igd');
+        allFacilities = allFacilities.filter((f) => f.type?.toLowerCase() === 'igd');
       } else {
-        allFacilities = allFacilities.filter((f) => f.type.toLowerCase().includes(ft));
+        allFacilities = allFacilities.filter((f) => f.type?.toLowerCase().includes(ft));
       }
     }
 
