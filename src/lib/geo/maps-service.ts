@@ -36,7 +36,7 @@ export async function findNearbyFacilities(
     let allFacilities = facilitiesSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    })) as Facility[];
+    })) as unknown as Facility[];
 
     if (facilityType) {
       const ft = facilityType.toLowerCase();
