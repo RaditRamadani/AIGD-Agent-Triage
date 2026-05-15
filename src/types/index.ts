@@ -29,6 +29,7 @@ export interface Facility {
   is_open: boolean | null;
   distance_km: number | null;
   duration_minutes: number | null;
+  type?: string;
 }
 
 // ── Booking Result ──

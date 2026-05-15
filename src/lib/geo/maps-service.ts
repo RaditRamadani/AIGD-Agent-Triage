@@ -18,10 +18,15 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
 }
 
 /**
- * Find nearby healthcare facilities using Firestore dummy data.
+ * Find nearby healthcare facilities using Firestore data.
  * Calculates straight-line distance locally.
  *
- * Returns top 5 results sorted by distance (ascending).
+ * Strategi pencarian bertahap:
+ *   1. Cari dalam radius yang diminta (default 20km)
+ *   2. Jika kosong, perluas ke 50km
+ *   3. Jika masih kosong, perluas ke 100km
+ *
+ * Returns top 5 results sorted by distance (terdekat dulu).
  */
 export async function findNearbyFacilities(
   lat: number,
@@ -30,29 +35,30 @@ export async function findNearbyFacilities(
   radiusMeters: number = 20000
 ): Promise<Facility[]> {
   try {
-    // 1. Ambil data fasilitas dari Firestore dummy
+    // 1. Ambil semua data fasilitas dari Firestore
     const facilitiesSnapshot = await db.collection('facilities').get();
 
     let allFacilities = facilitiesSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    })) as Facility[];
+    })) as unknown as Facility[];
 
+    // 2. Filter berdasarkan tipe faskes
     if (facilityType) {
       const ft = facilityType.toLowerCase();
       if (ft.includes('puskesmas') || ft.includes('klinik')) {
         allFacilities = allFacilities.filter((f) => 
-          f.type.toLowerCase() === 'puskesmas' || f.type.toLowerCase() === 'klinik'
+          f.type?.toLowerCase() === 'puskesmas' || f.type?.toLowerCase() === 'klinik'
         );
       } else if (ft.includes('igd')) {
-        allFacilities = allFacilities.filter((f) => f.type.toLowerCase() === 'igd');
+        allFacilities = allFacilities.filter((f) => f.type?.toLowerCase() === 'igd');
       } else {
-        allFacilities = allFacilities.filter((f) => f.type.toLowerCase().includes(ft));
+        allFacilities = allFacilities.filter((f) => f.type?.toLowerCase().includes(ft));
       }
     }
 
+    // 3. Hitung jarak untuk setiap faskes
     const enriched = allFacilities.map((facility) => {
-      // 2. Hitung jarak
       const distanceKm = getDistanceFromLatLonInKm(
         lat,
         lng,
@@ -60,22 +66,40 @@ export async function findNearbyFacilities(
         facility.location.lng
       );
       
-      // Asumsikan kecepatan rata-rata mobil di kota 30km/h
-      const durationMins = Math.round((distanceKm / 30) * 60);
+      // Estimasi waktu tempuh: kecepatan rata-rata 30km/h di kota
+      const durationMinutes = Math.round((distanceKm / 30) * 60);
 
       return {
         ...facility,
         distance_km: parseFloat(distanceKm.toFixed(2)),
-        duration_mins: durationMins,
+        duration_minutes: durationMinutes,
       };
     });
 
-    // 3. Filter berdasarkan radius dan urutkan
-    const filteredAndSorted = enriched
-      .filter((f) => f.distance_km * 1000 <= radiusMeters)
-      .sort((a, b) => a.distance_km - b.distance_km);
+    // 4. Urutkan berdasarkan jarak terdekat
+    const sorted = enriched.sort((a, b) => (a.distance_km ?? 999) - (b.distance_km ?? 999));
 
-    return filteredAndSorted.slice(0, 5);
+    // 5. Pencarian bertahap: mulai dari radius yang diminta,
+    //    jika kosong perluas secara progresif
+    const radiusSteps = [
+      radiusMeters,           // Radius awal (default 20km)
+      50000,                  // Fallback 50km
+      100000,                 // Fallback 100km
+    ];
+
+    for (const radius of radiusSteps) {
+      const results = sorted.filter((f) => (f.distance_km ?? 999) * 1000 <= radius);
+      if (results.length > 0) {
+        console.log(
+          '[Maps] Ditemukan ' + results.length + ' faskes dalam radius ' + (radius / 1000) + 'km'
+        );
+        return results.slice(0, 5);
+      }
+    }
+
+    // 6. Jika semua radius gagal, kembalikan 5 terdekat tanpa batasan radius
+    console.log('[Maps] Tidak ada faskes dalam 100km, mengembalikan 5 terdekat global');
+    return sorted.slice(0, 5);
   } catch (error) {
     console.error('Error in findNearbyFacilities:', error);
     return [];

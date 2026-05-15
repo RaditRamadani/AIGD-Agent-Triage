@@ -4,7 +4,7 @@ export const GetNearbyHospitalsSchema = z.object({
   lat: z.number(),
   lng: z.number(),
   facility_type: z.enum(['Puskesmas', 'Klinik', 'IGD']),
-  radius_meters: z.number().optional().default(5000),
+  radius_meters: z.number().optional().default(20000),
 });
 
 export const CreateMockBookingSchema = z.object({

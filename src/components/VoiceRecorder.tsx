@@ -51,17 +51,21 @@ export function VoiceRecorder({ onTranscript, disabled }: VoiceRecorderProps) {
 
       // Event: hasil transkripsi masuk
       recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let currentFinal = "";
         let interim = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+        
+        for (let i = 0; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += transcript + " ";
+            currentFinal += transcript + " ";
           } else {
             interim += transcript;
           }
         }
+        
+        finalTranscript = currentFinal;
         // Update preview teks sementara
-        setInterimText(finalTranscript + interim);
+        setInterimText(currentFinal + interim);
       };
 
       // Event: speech recognition berhenti
