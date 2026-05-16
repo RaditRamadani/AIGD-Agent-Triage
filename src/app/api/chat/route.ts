@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
       try {
         // ── Buat chat session dengan tools ──
         const chat = ai.chats.create({
-          model: 'gemini-2.0-flash',
+          model: 'gemini-2.5-flash',
           config: {
             systemInstruction: systemPrompt,
             tools: [
