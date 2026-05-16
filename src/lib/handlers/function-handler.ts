@@ -94,19 +94,6 @@ export async function handleFunctionCall(
       };
     }
 
-    // ── Tool 3: Tampilkan Form Booking ──
-    case 'promptBookingForm': {
-      const parsed = PromptBookingFormSchema.parse(args);
-      return {
-        name: functionName,
-        result: {
-          success: true,
-          facility_id: parsed.facility_id,
-          facility_name: parsed.facility_name,
-          message: 'Silakan isi formulir di bawah untuk melanjutkan reservasi.',
-        },
-      };
-    }
 
     // ── Fungsi tidak dikenali ──
     default:
