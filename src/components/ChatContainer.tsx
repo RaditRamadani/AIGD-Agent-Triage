@@ -180,7 +180,7 @@ export function ChatContainer() {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
 
   // ── Auto-scroll ke bawah saat ada pesan baru ──
@@ -235,6 +235,15 @@ export function ChatContainer() {
     setAttachments((prev) => prev.filter((a) => !a.type.startsWith("image/")));
   }, []);
 
+  // ── Auto-resize textarea sesuai konten ──
+  const autoResize = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    // Batasi tinggi maksimum ~5 baris (sekitar 120px)
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  }, []);
+
   // ══════════════════════════════════════════════════════════════
   // Send Message & SSE Consumer
   // ══════════════════════════════════════════════════════════════
@@ -248,9 +257,12 @@ export function ChatContainer() {
       dispatch({ type: "ADD_USER_MESSAGE", content });
       dispatch({ type: "START_AI_RESPONSE" });
 
-      // Reset input
+      // Reset input & kembalikan ukuran textarea ke 1 baris
       setTextInput("");
       setImagePreview(null);
+      if (inputRef.current) {
+        inputRef.current.style.height = "48px";
+      }
 
       // Bangun history dari feed
       const history: ChatMessage[] = state.feed
@@ -509,21 +521,33 @@ export function ChatContainer() {
             disabled={state.isLoading}
           />
 
-          {/* Text input */}
+          {/* Text input — textarea auto-resize */}
           <div className="flex-1 relative">
-            <input
+            <textarea
               ref={inputRef}
-              type="text"
+              rows={1}
               value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
+              onChange={(e) => {
+                setTextInput(e.target.value);
+                autoResize();
+              }}
+              onKeyDown={(e) => {
+                // Enter = kirim, Shift+Enter = baris baru
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
               placeholder="Ketik keluhan Anda..."
               disabled={state.isLoading}
               className="w-full px-4 py-3 rounded-xl border border-[hsl(var(--color-border))]
                          bg-[hsl(var(--color-bg))] text-base
                          placeholder:text-[hsl(var(--color-text-muted))]
                          focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]
-                         disabled:opacity-50 transition-all duration-150"
+                         disabled:opacity-50 transition-all duration-150
+                         resize-none overflow-hidden leading-relaxed"
               aria-label="Ketik keluhan kesehatan Anda"
+              style={{ height: "48px" }}
             />
           </div>
 
