@@ -48,30 +48,32 @@ export function VoiceRecorder({ onTranscript, disabled }: VoiceRecorderProps) {
       recognition.interimResults = true; // Tampilkan teks sementara
 
       let finalTranscript = "";
+      let lastInterim = "";
 
       // Event: hasil transkripsi masuk
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        let currentFinal = "";
         let interim = "";
         
-        for (let i = 0; i < event.results.length; i++) {
+        // Loop hanya pada hasil yang baru/berubah (standard pattern)
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            currentFinal += transcript + " ";
+            finalTranscript += transcript + " ";
           } else {
             interim += transcript;
           }
         }
         
-        finalTranscript = currentFinal;
+        lastInterim = interim;
         // Update preview teks sementara
-        setInterimText(currentFinal + interim);
+        setInterimText(finalTranscript + interim);
       };
 
       // Event: speech recognition berhenti
       recognition.onend = () => {
         setIsRecording(false);
-        const result = finalTranscript.trim();
+        // Fallback: gunakan lastInterim jika finalTranscript belum sempat ter-commit (user klik stop cepat)
+        const result = (finalTranscript || lastInterim).trim();
         setInterimText("");
         if (result) {
           onTranscript(result);
