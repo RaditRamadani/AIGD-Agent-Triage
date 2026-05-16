@@ -125,8 +125,12 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
     case "ADD_BOOKING":
       return {
         ...state,
+        // Hapus item facilities & booking_form setelah booking berhasil
+        // agar daftar rekomendasi tidak tertampil setelah proses booking selesai
         feed: [
-          ...state.feed,
+          ...state.feed.filter(
+            (item) => item.type !== "facilities"
+          ),
           {
             type: "booking",
             bookingId: action.bookingId,
