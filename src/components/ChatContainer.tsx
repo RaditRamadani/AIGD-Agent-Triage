@@ -9,6 +9,7 @@ import { DisclaimerBanner } from "./DisclaimerBanner";
 import { MessageBubble, TypingIndicator } from "./MessageBubble";
 import { CareNavCard } from "./CareNavCard";
 import { BookingCard } from "./BookingCard";
+import { BookingFormCard } from "./BookingFormCard";
 import { MapEmbed } from "./MapEmbed";
 import { VoiceRecorder } from "./VoiceRecorder";
 import { ImageUploader } from "./ImageUploader";
@@ -36,11 +37,18 @@ interface BookingItem {
   message: string;
 }
 
+interface BookingFormItem {
+  type: "booking_form";
+  facilityId: string;
+  facilityName: string;
+}
+
 type FeedItem =
   | { type: "message"; message: ChatMessage }
   | CareNavItem
   | FacilitiesItem
-  | BookingItem;
+  | BookingItem
+  | BookingFormItem;
 
 interface ChatState {
   feed: FeedItem[];
@@ -55,6 +63,7 @@ type ChatAction =
   | { type: "ADD_CARE_NAV"; careNavigation: string; reasoning: string }
   | { type: "ADD_FACILITIES"; facilities: Facility[] }
   | { type: "ADD_BOOKING"; bookingId: string; facilityName: string; message: string }
+  | { type: "ADD_BOOKING_FORM"; facilityId: string; facilityName: string }
   | { type: "FINISH_AI_RESPONSE" }
   | { type: "SET_LOCATION"; location: { lat: number; lng: number } };
 
@@ -123,6 +132,19 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
             bookingId: action.bookingId,
             facilityName: action.facilityName,
             message: action.message,
+          },
+        ],
+      };
+
+    case "ADD_BOOKING_FORM":
+      return {
+        ...state,
+        feed: [
+          ...state.feed,
+          {
+            type: "booking_form",
+            facilityId: action.facilityId,
+            facilityName: action.facilityName,
           },
         ],
       };
@@ -311,6 +333,19 @@ export function ChatContainer() {
                     break;
                   }
 
+                  case "booking_form": {
+                    const form = event.data as {
+                      facility_id: string;
+                      facility_name: string;
+                    };
+                    dispatch({
+                      type: "ADD_BOOKING_FORM",
+                      facilityId: form.facility_id,
+                      facilityName: form.facility_name,
+                    });
+                    break;
+                  }
+
                   case "disclaimer":
                     // Disclaimer sudah ditampilkan di banner, skip
                     break;
@@ -430,6 +465,20 @@ export function ChatContainer() {
                   bookingId={item.bookingId}
                   facilityName={item.facilityName}
                   message={item.message}
+                />
+              );
+
+            case "booking_form":
+              return (
+                <BookingFormCard
+                  key={index}
+                  facilityId={item.facilityId}
+                  facilityName={item.facilityName}
+                  disabled={state.isLoading}
+                  onSubmit={(data) => {
+                    const submissionText = `Data reservasi untuk ${item.facilityName}:\nNama: ${data.name}\nNo HP: ${data.phone}\nWaktu: ${data.time}\nSilakan proses bookingnya.`;
+                    sendMessage(submissionText);
+                  }}
                 />
               );
 

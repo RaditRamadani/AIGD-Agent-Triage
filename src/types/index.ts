@@ -43,7 +43,7 @@ export interface BookingResult {
 }
 
 // ── SSE Event Types ──
-export type SSEEventType = 'text' | 'care_nav' | 'facilities' | 'booking' | 'disclaimer' | 'tool';
+export type SSEEventType = 'text' | 'care_nav' | 'facilities' | 'booking' | 'booking_form' | 'disclaimer' | 'tool';
 
 export interface SSEEvent {
   type: SSEEventType;

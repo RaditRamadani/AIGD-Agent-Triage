@@ -9,6 +9,7 @@ import { systemPrompt } from '@/lib/gemini/system-prompt';
 import {
   getNearbyHospitalsDeclaration,
   createMockBookingDeclaration,
+  promptBookingFormDeclaration,
 } from '@/lib/gemini/tools';
 import { handleFunctionCall } from '@/lib/handlers/function-handler';
 import type { ChatMessage, Attachment, SSEEvent } from '@/types';
@@ -161,7 +162,7 @@ export async function POST(request: NextRequest) {
       try {
         // ── Buat chat session dengan tools ──
         const chat = ai.chats.create({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           config: {
             systemInstruction: systemPrompt,
             tools: [
@@ -169,6 +170,7 @@ export async function POST(request: NextRequest) {
                 functionDeclarations: [
                   getNearbyHospitalsDeclaration,
                   createMockBookingDeclaration,
+                  promptBookingFormDeclaration,
                 ],
               },
             ],
@@ -221,6 +223,14 @@ export async function POST(request: NextRequest) {
                 await writeSSE(writer, encoder, {
                   type: 'booking',
                   data: handlerResult.result,
+                });
+              } else if (fc.name === 'promptBookingForm' && handlerResult.result.success) {
+                await writeSSE(writer, encoder, {
+                  type: 'booking_form',
+                  data: {
+                    facility_id: handlerResult.result.facility_id,
+                    facility_name: handlerResult.result.facility_name,
+                  },
                 });
               }
 

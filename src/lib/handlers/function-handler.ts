@@ -7,6 +7,7 @@ import { createBooking } from '@/lib/firebase/admin';
 import {
   GetNearbyHospitalsSchema,
   CreateMockBookingSchema,
+  PromptBookingFormSchema,
 } from '@/lib/schemas/function-schemas';
 
 // ── Type untuk hasil handler ──
@@ -75,6 +76,34 @@ export async function handleFunctionCall(
           booking_id: bookingResult.booking_id,
           facility_name: bookingResult.facility_name,
           message: `Reservasi berhasil dibuat di ${bookingResult.facility_name}`,
+        },
+      };
+    }
+
+    // ── Tool 3: Tampilkan Form Booking ──
+    case 'promptBookingForm': {
+      const parsed = PromptBookingFormSchema.parse(args);
+      return {
+        name: functionName,
+        result: {
+          success: true,
+          facility_id: parsed.facility_id,
+          facility_name: parsed.facility_name,
+          message: 'Silakan isi formulir di bawah untuk melanjutkan reservasi.',
+        },
+      };
+    }
+
+    // ── Tool 3: Tampilkan Form Booking ──
+    case 'promptBookingForm': {
+      const parsed = PromptBookingFormSchema.parse(args);
+      return {
+        name: functionName,
+        result: {
+          success: true,
+          facility_id: parsed.facility_id,
+          facility_name: parsed.facility_name,
+          message: 'Silakan isi formulir di bawah untuk melanjutkan reservasi.',
         },
       };
     }

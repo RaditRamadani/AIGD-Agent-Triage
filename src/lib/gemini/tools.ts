@@ -53,3 +53,16 @@ export const createMockBookingDeclaration: FunctionDeclaration = {
     ],
   },
 };
+
+export const promptBookingFormDeclaration: FunctionDeclaration = {
+  name: 'promptBookingForm',
+  description: 'Tampilkan formulir pendaftaran kepada pasien untuk mengumpulkan detail reservasi (Nama, HP, Waktu).',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      facility_id: { type: Type.STRING, description: 'ID faskes' },
+      facility_name: { type: Type.STRING, description: 'Nama faskes' },
+    },
+    required: ['facility_id', 'facility_name'],
+  },
+};

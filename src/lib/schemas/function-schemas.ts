@@ -17,3 +17,8 @@ export const CreateMockBookingSchema = z.object({
   reasoning: z.string(),
   preferred_time: z.string().optional(),
 });
+
+export const PromptBookingFormSchema = z.object({
+  facility_id: z.string(),
+  facility_name: z.string(),
+});
